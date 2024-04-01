@@ -1,0 +1,50 @@
+version: "3.9"
+
+name: scrapper
+
+services:
+    app:
+        container_name: app
+        build: ./php
+        ports:
+            - "9000:9000"
+        volumes:
+            - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+            - ./../:/var/www
+        working_dir: /var/www
+        networks:
+            - backend
+    nginx:
+        container_name: nginx
+        image: nginx:latest
+        ports:
+            - "80:80"
+        volumes:
+            - ./nginx/conf.d/:/etc/nginx/conf.d
+            - ./../:/var/www
+        networks:
+            - backend
+    db:
+        container_name: db
+        image: postgres:16.2
+        networks:
+            - backend
+        volumes:
+            - ./mysql/data:/var/lib/mysql
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_DB: app
+            POSTGRES_USER: root
+            POSTGRES_PASSWORD: password
+    redis:
+        container_name: redis
+        image: redis:latest
+        ports:
+            - "6379:6379"
+        networks:
+            - backend
+
+networks:
+    backend:
+        name: backend
